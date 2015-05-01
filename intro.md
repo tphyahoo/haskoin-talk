@@ -8,12 +8,6 @@ Libertarian catnip:
 * You can now buy drugs on the internet! 
 * And degrade central gov ability to wage war by sneaky inflation tax!
 
-
-Show of hands  
-
-* who feels like they basically understand bitcoin?
-* We can take a couple minutes for basic understanding questions, if anyone has any
-
 Wild west phase -> Regulated phase
 
 Like gold

@@ -1,6 +1,23 @@
 # Haskoin (Bitcoin library for haskell)
 
+## Scratchpad / party line(anyone can edit)
+
+https://docs.google.com/document/d/1LWYoX9GEAl5V5uXyLoUXPr-xTSyPlCTi6OQWu6YJ5IE/edit?usp=sharing
+
+## Sanity check / temperature / show of hands
+
+* Who is comfortable programming in haskell? (show of hands)
+* who feels like they basically understand bitcoin?
+* Does anyone have basic newbie level questions about bitcoin, or should we skip that?
+* who owns some bitcoin?
+* who owns bitcoin that they can easily donate a buck or two later on when we do group exercise in a bit?
+* you will probably want some bitcoin to play around with later.  google "bitcoin faucet" and see if you can beg some, or ask a bitcoin owner to donate some
+
+
+## we will touch on
+
 haskoin / haskoin wallet / haskoin faucet
+
 
 ## Why haskoin? 
 
@@ -10,6 +27,7 @@ haskoin / haskoin wallet / haskoin faucet
 * http://www.reddit.com/r/Bitcoin/comments/33u2id/help_losing_over_85_btc_because_of_bitgos_flawed/
 * Bitgo transaction recovery bug was a javascript floating point bug
 * Types are nice! (Especially when you're dealing with money and security matters)  
+* personal goal: it would be cool to build stuff with bitcoin using haskell -- paying gigs / consulting / personal projects... we'll see.
 
 ## Ecosystem / discoverability:
 
@@ -18,7 +36,6 @@ haskoin / haskoin wallet / haskoin faucet
 * commercial software in sorta-stealth mode
 * no mailing list
 * has irc channgel but high latency
-* I'd like to make haskoin more mainstream... we'll see.
 
 ### haskoin (wrangled 0.2.0 install. but only ever used 0.1.0)
 
@@ -57,7 +74,7 @@ haskoin / haskoin wallet / haskoin faucet
 ## Entry points to haskoin-wallet
 
 * test suites
-* hw, command line tool.  similar to sx / bx (from darkwallet), but with less functionality
+* hw, a command line tool.  similar to sx / bx (from darkwallet), but with less functionality
 
 ### Test suite
 
@@ -96,26 +113,129 @@ Internal addresses are change addresses.
 
 External addresses are addresses you give people to send you payments.  
 
-# Let's move some bitcoin around
+# Preliminaries / Setup
+
+Slight regret: I would have liked to use testnet / testcoins, but doesn't seem to be supported in 0.1.0, so used small amount of mainnet (real bitcoins).
+
+Prediction: When we break up into groups and actually try to start spending the bitcoin, there will likely be orphans / side chains, and other kinds of book-keeping chaos.  Let's just see what happens :) 
 
 * generate a bip32 wallet from a passphrase
-* hw init 'correct horse battery staple' # not sure what transform hw uses to get a bip32 master key.  would be interesting to know.
+
+```
+hw init 'correct horse battery staple' # not sure what transform hw uses to get a bip32 master key.  would be interesting to know.
+```
+
+* you may want to generate additional wallets to send bitcoin to, eg 
+
+```
+hw init 'correct horse battery staple 1 ' (1 through n, or pick a better passphrase, or... be creative)
+```
+
 * generate some accounts 
 * hw newacc testaccount1; hw newacc testaccount2 # later we will be sending money from testaccount1 to testaccoun2
-* 
 * unlike satoshi/aka bitcoind and many other clients, these accounts can be specified as a source when sending bitcoin from the wallet, rather than all accounts mixed together.  Sometimes this notion of an account is called a "purse" (like in darkwallet)
-* generate some addresses for the account
-* send some bitcoin to your wallet from pre-existing bitcoin source (don't have to actually send bitcoin -- can just generate signed transaction and not broadcast it!) 
-* get hex transaction, eg
-* https://blockchain.info/tx/b134d7b90b95923fcc4565fa26ec08063732c738214f1997ba1b6c5e18f4114b (not hex)
-* https://blockchain.info/tx/b134d7b90b95923fcc4565fa26ec08063732c738214f1997ba1b6c5e18f4114b?format=hex (hex)
+* generate some addresses
+* you can see the new addresses in sqlite if you want to, I think
+* hw genaddr    testaccount1 ; hw genaddr testaccount2
+
+```
+haskell@8e5176e39371:~/haskoin-wallet$ hw balances # in satoshis
+- Balance: 433490
+  Account: testaccount1
+- Balance: 10
+  Account: testaccount2
+- Balance: 0
+  Account: testaccount3
+- Balance: 0
+  Account: testaccount4
+- Balance: 0
+  Account: testaccount5
+```
+* But the above won't show till the transactions have been imported so we need to chase down and import the transactions
+
+```
+haskell@8e5176e39371:~/haskoin-wallet$ hw coins testaccount1
+- Script: 76a91402b833eaee3983fd86c0409db4eaf7e25f1b1d0388ac
+  Address: 1FP226Khx3qNu2wrLM8QraKKiLMWu16tG
+  TxID: 3b9c3510ba489a9086d18e955a1ebadb455e08038f116c0ef7ca305655a80457
+  Index: 1
+  Value: 433490
+haskell@8e5176e39371:~/haskoin-wallet$ hw coins testaccount2
+- Script: 76a9144ab68f1b58eede6fc5bfd860f7ba2a67114f58c688ac
+  Address: 17p3hcqepcZ8kixLT21C451BnrLGbrN5YJ
+  TxID: 3b9c3510ba489a9086d18e955a1ebadb455e08038f116c0ef7ca305655a80457
+  Index: 0
+  Value: 10
+```
+
+https://blockchain.info/tx/3b9c3510ba489a9086d18e955a1ebadb455e08038f116c0ef7ca305655a80457
+https://blockchain.info/tx/3b9c3510ba489a9086d18e955a1ebadb455e08038f116c0ef7ca305655a80457?format=hex
+
+haskell@8e5176e39371:~/haskoin-wallet$ hw importtx  `curl --silent https://blockchain.info/rawtx/3b9c3510ba489a9086d18e955a1ebadb455e08038f116c0ef7ca305655a80457?format=hex `
+
+Disclaimer: not sure if above will actually work to get the bitcoin showing.
+
+New Transactions can be broadcasted here:
+
+https://blockchain.info/pushtx
+
+# Group work period
+
+Break up into small groups (2-4 people)
+
+Pick one of these tasks to work on
+
+## Task oriented:
+
+* steal the "correct horse battery staple" wallet bitcoin (if it is still around)
+* create a wallet with a different seed, populate it with accounts & addresses
+* Try to get bitcoin showing inside this wallet (doesn't require broadcasting transaction, just requires importing transaction)
+* Try to get bitcoin ACTUALLY in this wallet (requires broadcasting transaction)
+
+Harder:
+
+Generate a 2-of-3 (or 2-of-4 or whatever-of-whatever) account using hw, such that the consent of multiple trusted people is required to spend the bitcoin.
+
+Disclaimer: I haven't actually done this and I'm not sure if it is currently supported, but hw --help seems to suggest it is possible.
+
+starting point for this:
+
+```
+haskell@8e5176e39371:~/haskoin-wallet$ hw --help | grep multi
+  newms      name M N [pubkey...]    Create a new multisig account
+  addkeys    acc {pubkey...}         Add pubkeys to a multisig account
+```
+
+## Code oriented:
+
+Easy-ish:
+
+Programatically generate an arbitrary derived privkey (and/or pubkey) using 
+
+```
+xprv9s21ZrQH143K2mDJW8vDeFwbyDbFv868mM2Zr87rJSTj8q16Unkaq1pryiVYJ3gvoGtazbgKYs1v8rByDYg4LPpQPL6jHjwwhv7DWhWjyXo
+```
+
+as the master key. Check the result using tool at http://bip32.org/
+
+EG, custom path (on bip32.org) m/0/2/0 should produce address 12XZzYUMEk5tbFmU2hKvBUruJ1x87H1iEh
+
+Not so easy:
+
+* Do a teardown on one of the transactions we have encountered so far.
+* If it's showable, display it using Debug.trace
+
+Generate an interesting transaction programatically using script primitives. For some value of interesting.  (Not even sure where I am going with this one to be honest!)
 
 
-Create wallet
 
 
 
-I would have liked to use testnet / testcoins, but doesn't seem to be supported in 0.1.0, so used small amount of mainnet (real bitcoins).
+
+
+
+
+
 
 
 
